@@ -364,7 +364,7 @@ var bookingsRef = db.ref('bookings');
 // ══ LOCAL STATE ══
 var allBookings = [];
 var adminUnlocked = false;
-var DEFAULT_PIN = '5005';
+var DEFAULT_PIN = '1234';
 
 function getPin() { return localStorage.getItem('tyris_admin_pin') || DEFAULT_PIN; }
 
@@ -674,7 +674,7 @@ function showDay(dateStr){
   var parts=dateStr.split('-');
   document.getElementById('day-detail-title').textContent='Bookings for '+parts[2]+'/'+parts[1]+'/'+parts[0]+' ('+bks.length+')';
   var html='';
-  for(var i=0;i<bks.length;i++){var b=bks[i];html+='<div class="detail-item"><div style="font-weight:700">'+esc(b.site)+' '+badge(b.status)+'</div><div style="font-size:13px;color:var(--muted);margin-top:4px">⏰ '+fmtTime(b.time)+' · ⏱ '+esc(b.duration)+' · 📦 '+esc(b.loadType)+'</div>'+(b.from||b.to?'<div style="font-size:13px;color:var(--muted)">🚚 '+esc(b.from||'—')+' → '+esc(b.to||'—')+'</div>':'')+(b.notes?'<div style="font-size:12px;color:var(--muted);font-style:italic">'+esc(b.notes)+'</div>':'')+'<div style="font-size:11px;color:#9CA3AF">Submitted by '+esc(b.name)+'</div></div>';}
+  for(var i=0;i<bks.length;i++){var b=bks[i];html+='<div class="detail-item"><div style="font-weight:700">'+esc(b.site)+' '+badge(b.status)+'</div><div style="font-size:13px;color:var(--muted);margin-top:4px">⏰ '+fmtTime(b.time)+' · ⏱ '+esc(b.duration)+' · 📦 '+esc(b.loadType)+'</div>'+(b.from||b.to?'<div style="font-size:13px;color:var(--muted)">🚚 '+esc(b.from||'—')+' → '+esc(b.to||'—')+'</div>':'')+(b.notes?'<div style="font-size:12px;color:var(--muted);font-style:italic">'+esc(b.notes)+'</div>':'')+(b.status==='declined'&&b.reason?'<div style="font-size:12px;color:#991B1B;font-style:italic">❌ Reason: '+esc(b.reason)+'</div>':'')+(b.completedAt?'<div style="margin-top:6px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>':'')+'<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Submitted by '+esc(b.name)+'</div></div>';}
   document.getElementById('day-detail-list').innerHTML=html;
   var panel=document.getElementById('day-detail');panel.classList.add('visible');panel.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
