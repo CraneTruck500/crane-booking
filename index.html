@@ -199,6 +199,16 @@
   .reason-input.visible { display: block; }
   .confirm-decline { display: none; margin-top: 8px; width: 100%; }
 
+  /* EDIT MODAL */
+  .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,.5); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--surface); border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,.25); padding: 28px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; font-weight: 700; color: var(--brand); margin-bottom: 6px; }
+  .modal p  { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .modal .field { margin-bottom: 16px; }
+  .modal .field label { font-size: 13px; }
+
   @media (max-width: 520px) {
     .card { padding: 20px 16px; } .card-title-bar { margin: -20px -16px 20px; padding: 18px 18px 14px; }
     .field-row { grid-template-columns: 1fr; }
@@ -340,6 +350,59 @@
     </div>
   </div>
 </main>
+<!-- EDIT MODAL -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal">
+    <h2 id="edit-modal-title">Edit Booking</h2>
+    <p id="edit-modal-desc">Confirm your name to edit this pending booking.</p>
+    <input type="hidden" id="edit-key">
+    <div id="edit-name-verify" style="display:none">
+      <div class="field">
+        <label>Confirm your name <span class="req">*</span></label>
+        <input type="text" id="edit-verify-name" placeholder="Enter your name exactly as submitted...">
+      </div>
+      <div style="color:var(--danger);font-size:13px;min-height:18px" id="edit-verify-error"></div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="verifyAndShowEdit()">Continue</button>
+        <button class="btn-ghost"   onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+    <div id="edit-form-fields" style="display:none">
+      <div class="field"><label>Site Name / Location <span class="req">*</span></label><input type="text" id="e-site" maxlength="120"></div>
+      <div class="field-row">
+        <div class="field"><label>From <span class="req">*</span></label><input type="text" id="e-from" maxlength="120"></div>
+        <div class="field"><label>To <span class="req">*</span></label><input type="text" id="e-to" maxlength="120"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Requested Date <span class="req">*</span></label><input type="date" id="e-date"></div>
+        <div class="field"><label>Start Time <span class="req">*</span></label><input type="time" id="e-time"></div>
+      </div>
+      <div class="field">
+        <label>Estimated Duration <span class="req">*</span></label>
+        <select id="e-duration"><option value="">Select...</option><option>1-2 Hours</option><option>Half-Day</option><option>Full Day</option></select>
+      </div>
+      <div class="field">
+        <label>Load Type <span class="req">*</span></label>
+        <select id="e-loadtype" onchange="document.getElementById('e-other-wrap').style.display=this.value==='Other'?'block':'none'">
+          <option value="Container">Container</option>
+          <option value="Plant / Machinery">Plant / Machinery</option>
+          <option value="Materials">Materials</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field" id="e-other-wrap" style="display:none">
+        <label>Specify load type</label>
+        <input type="text" id="e-other-text" maxlength="80" placeholder="Please specify...">
+      </div>
+      <div class="field"><label>Description / Notes</label><textarea id="e-notes"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+        <button class="btn-ghost"   onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <!-- Firebase SDK -->
@@ -587,6 +650,9 @@ function renderList() {
     if(b.notes) html+='<div class="bc-notes">"'+esc(b.notes)+'"</div>';
     if(b.status==='declined'&&b.reason) html+='<div class="bc-reason">❌ Reason: '+esc(b.reason)+'</div>';
     html+='<div class="bc-submitter">Submitted by '+esc(b.name)+' · '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
+    if(b.status==='pending'){
+      html+='<div style="margin-top:10px"><button class="btn-ghost" style="padding:7px 16px;font-size:13px" onclick="openEditModal(\''+k+'\')">Edit Booking</button></div>';
+    }
     if(b.status==='approved'){
       if(b.completedAt) html+='<div style="margin-top:10px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
       else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(\''+k+'\')">🏁 Mark as Complete</button></div>';
@@ -638,7 +704,113 @@ function exportExcel() {
   a.href=url; a.download='Tyris_Crane_Bookings_'+todayStr()+'.xls'; a.click(); URL.revokeObjectURL(url);
 }
 
-// ══ CALENDAR ══
+// == EDIT MODAL ==
+var editIsAdmin = false;
+var editCurrentKey = null;
+
+function openEditModal(key) {
+  var b = null;
+  for (var i=0;i<allBookings.length;i++) { if (allBookings[i]._key===key) { b=allBookings[i]; break; } }
+  if (!b) return;
+  editIsAdmin = false;
+  editCurrentKey = key;
+  document.getElementById('edit-modal-title').textContent = 'Edit Booking';
+  document.getElementById('edit-modal-desc').textContent = 'Confirm your name to edit this pending booking.';
+  document.getElementById('edit-verify-name').value = '';
+  document.getElementById('edit-verify-error').textContent = '';
+  document.getElementById('edit-name-verify').style.display = 'block';
+  document.getElementById('edit-form-fields').style.display = 'none';
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function openEditModalAdmin(key) {
+  var b = null;
+  for (var i=0;i<allBookings.length;i++) { if (allBookings[i]._key===key) { b=allBookings[i]; break; } }
+  if (!b) return;
+  editIsAdmin = true;
+  editCurrentKey = key;
+  document.getElementById('edit-modal-title').textContent = 'Edit Booking (Admin)';
+  document.getElementById('edit-modal-desc').textContent = 'Edit any field. Status will reset to Pending after saving.';
+  document.getElementById('edit-name-verify').style.display = 'none';
+  populateEditForm(b);
+  document.getElementById('edit-form-fields').style.display = 'block';
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function verifyAndShowEdit() {
+  var entered = document.getElementById('edit-verify-name').value.trim().toLowerCase();
+  var b = null;
+  for (var i=0;i<allBookings.length;i++) { if (allBookings[i]._key===editCurrentKey) { b=allBookings[i]; break; } }
+  if (!b) return;
+  if (entered !== b.name.toLowerCase()) {
+    document.getElementById('edit-verify-error').textContent = 'Name does not match. Please enter your name exactly as submitted.';
+    return;
+  }
+  document.getElementById('edit-verify-error').textContent = '';
+  document.getElementById('edit-name-verify').style.display = 'none';
+  populateEditForm(b);
+  document.getElementById('edit-form-fields').style.display = 'block';
+}
+
+function populateEditForm(b) {
+  document.getElementById('e-site').value     = b.site     || '';
+  document.getElementById('e-from').value     = b.from     || '';
+  document.getElementById('e-to').value       = b.to       || '';
+  document.getElementById('e-date').value     = b.date     || '';
+  document.getElementById('e-time').value     = b.time     || '';
+  document.getElementById('e-notes').value    = b.notes    || '';
+  document.getElementById('e-duration').value = b.duration || '';
+  var lt = b.loadType || '';
+  var known = ['Container','Plant / Machinery','Materials'];
+  var isKnown = false;
+  for (var i=0;i<known.length;i++) { if (lt===known[i]) { isKnown=true; break; } }
+  if (isKnown) {
+    document.getElementById('e-loadtype').value = lt;
+    document.getElementById('e-other-wrap').style.display = 'none';
+  } else {
+    document.getElementById('e-loadtype').value = 'Other';
+    document.getElementById('e-other-wrap').style.display = 'block';
+    document.getElementById('e-other-text').value = lt.replace('Other: ','');
+  }
+}
+
+function saveEdit() {
+  var site     = document.getElementById('e-site').value.trim();
+  var from     = document.getElementById('e-from').value.trim();
+  var to       = document.getElementById('e-to').value.trim();
+  var date     = document.getElementById('e-date').value;
+  var time     = document.getElementById('e-time').value;
+  var duration = document.getElementById('e-duration').value;
+  var ltSel    = document.getElementById('e-loadtype').value;
+  var notes    = document.getElementById('e-notes').value.trim();
+  var errs = [];
+  if (!site)     errs.push('Site Name');
+  if (!from)     errs.push('From');
+  if (!to)       errs.push('To');
+  if (!date)     errs.push('Date');
+  if (!time)     errs.push('Time');
+  if (!duration) errs.push('Duration');
+  if (errs.length) { alert('Please complete:\n- ' + errs.join('\n- ')); return; }
+  var loadType = ltSel;
+  if (ltSel==='Other') { var ot=document.getElementById('e-other-text').value.trim(); loadType=ot?'Other: '+ot:'Other'; }
+  var updates = { site:site, from:from, to:to, date:date, time:time, duration:duration, loadType:loadType, notes:notes };
+  if (editIsAdmin) { updates.status='pending'; updates.reason=''; updates.approvedAt=''; }
+  updateBooking(editCurrentKey, updates).then(function() {
+    showToast('Booking updated!', '#1B4FA8');
+    closeEditModal();
+  }).catch(function(e) { alert('Error: ' + e.message); });
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+  editCurrentKey = null;
+}
+
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// == CALENDAR ==
 var calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
