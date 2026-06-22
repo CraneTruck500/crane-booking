@@ -556,6 +556,7 @@ function pad(n) { return String(n).padStart(2,'0'); }
 
 // ══ BUTTON HELPERS (avoid quote nesting in HTML strings) ══
 function getKey(el) { return el.closest('[data-key]') ? el.closest('[data-key]').dataset.key : el.parentElement.closest('[data-key]') ? el.parentElement.closest('[data-key]').dataset.key : null; }
+function changeStatusBtn(btn) { var card=btn.closest('.admin-card'); var k=card.dataset.key; var sel=card.querySelector('.status-select'); if(k&&sel) changeStatus(k,sel.value); }
 function declineBkn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) declineBooking(k); }
 function toggleReasonBtn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) toggleReason(k); }
 function approveBkn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) approveBooking(k); }
@@ -608,12 +609,7 @@ function resetBooking(key) {
   updateBooking(key, {status:'pending', reason:'', approvedAt:''})
     .catch(function(e){ alert('Error: '+e.message); });
 }
-function changeStatus(btn) {
-  var key = btn ? (btn.dataset ? btn.dataset.key : btn) : btn;
-  if (!key) return;
-  var sel = document.getElementById('status-sel-'+key);
-  if (!sel) return;
-  var newStatus = sel.value;
+function changeStatus(key, newStatus) {
   var b = null;
   for (var i=0;i<allBookings.length;i++) { if (allBookings[i]._key===key) { b=allBookings[i]; break; } }
   if (!b) return;
@@ -660,7 +656,7 @@ function renderAdmin() {
   var html='';
   for(var i=0;i<filtered.length;i++){
     var b=filtered[i]; var k=b._key; var isPending=b.status==='pending';
-    html+='<div class="admin-card '+b.status+'" data-key=\''+k+'\''>'; 
+    html += '<div class="admin-card ' + b.status + '" data-key="' + k + '">';
     html+='<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="ac-site">'+esc(b.site)+'</div><div style="font-size:13px;color:var(--muted)">📅 '+fmtDate(b.date)+' at '+fmtTime(b.time)+'</div></div>';
     if(b.from||b.to) html+='<div class="ac-meta">🚚 <strong>From:</strong> '+esc(b.from||'—')+' → <strong>To:</strong> '+esc(b.to||'—')+'</div>';
     html+='<div class="ac-meta">⏱ '+esc(b.duration)+' · 📦 '+esc(b.loadType)+' · '+badge(b.status)+'</div>';
@@ -678,7 +674,7 @@ function renderAdmin() {
     html+='<button class="btn-status-save" onclick="changeStatus(\'' + k + '\')"  >Apply</button>';
     html+='</div>';
     html+='<div class="approve-actions">';
-    if(isPending) html+='<button class="btn-approve" onclick="approveBooking(''+k+'')">✅ Approve</button><button class="btn-decline" onclick="toggleReasonBtn(this)">❌ Decline</button>';
+    if(isPending) html+='<button class="btn-approve" onclick="approveBkn(this)">✅ Approve</button><button class="btn-decline" onclick="toggleReasonBtn(this)">❌ Decline</button>';
     if(!isPending) html+='<button class="btn-reset" onclick="resetBkn(this)">↩ Reset</button>';
     html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBkn(this)">🗑 Delete</button>';
     html+='</div>';
@@ -696,21 +692,21 @@ function renderAdmin() {
         html+='</div>';
       } else {
         // Show unlock panel for driver
-        html+='<div class="odo-unlock" data-key=\''+k+'\''>'; 
+        html+='<div class="odo-unlock" data-key="'+k+'">';
         html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
         html+='<div class="odo-unlock-row">';
         html+='<input type="password" class="odo-pin-input" id="odo-pin-' + k + '" maxlength="6" placeholder="PIN">';
-        html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
+        html+='<button class="btn-odo-unlock" onclick="unlockOdo(this)">Unlock</button>';
         html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
         html+='</div>';
-        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key=\''+k+'\''>'; 
+        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key="'+k+'">';
         html+='<div class="odo-grid">';
         html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Crane Start (hrs)</label><input type="number" id="cs-'+k+'" placeholder="e.g. 1204.5" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Crane End (hrs)</label><input type="number" id="ce-'+k+'" placeholder="e.g. 1207.0" step="0.1" min="0"></div>';
         html+='</div>';
-        html+='<button class="btn-complete" onclick="saveOdo(''+k+'')" style="width:100%">Save Readings</button>';
+        html+='<button class="btn-complete" onclick="saveOdo(this)" style="width:100%">Save Readings</button>';
         html+='</div>';
         html+='</div>';
       }
@@ -769,21 +765,21 @@ function renderList() {
         html+='</div>';
       } else {
         // Show unlock panel for driver
-        html+='<div class="odo-unlock" data-key=\''+k+'\''>'; 
+        html+='<div class="odo-unlock" data-key="'+k+'">';
         html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
         html+='<div class="odo-unlock-row">';
         html+='<input type="password" class="odo-pin-input" id="odo-pin-' + k + '" maxlength="6" placeholder="PIN">';
-        html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
+        html+='<button class="btn-odo-unlock" onclick="unlockOdo(this)">Unlock</button>';
         html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
         html+='</div>';
-        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key=\''+k+'\''>'; 
+        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key="'+k+'">';
         html+='<div class="odo-grid">';
         html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Crane Start (hrs)</label><input type="number" id="cs-'+k+'" placeholder="e.g. 1204.5" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Crane End (hrs)</label><input type="number" id="ce-'+k+'" placeholder="e.g. 1207.0" step="0.1" min="0"></div>';
         html+='</div>';
-        html+='<button class="btn-complete" onclick="saveOdo(''+k+'')" style="width:100%">Save Readings</button>';
+        html+='<button class="btn-complete" onclick="saveOdo(this)" style="width:100%">Save Readings</button>';
         html+='</div>';
         html+='</div>';
       }
