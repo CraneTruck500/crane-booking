@@ -553,6 +553,17 @@ function pillCls(lt) { if(!lt)return''; var l=lt.toLowerCase(); if(l.indexOf('co
 function badge(s) { var m={pending:'⏳ Pending',approved:'✅ Approved',declined:'❌ Declined'}; return '<span class="badge '+s+'">'+(m[s]||s)+'</span>'; }
 function pad(n) { return String(n).padStart(2,'0'); }
 
+
+// ══ BUTTON HELPERS (avoid quote nesting in HTML strings) ══
+function getKey(el) { return el.closest('[data-key]') ? el.closest('[data-key]').dataset.key : el.parentElement.closest('[data-key]') ? el.parentElement.closest('[data-key]').dataset.key : null; }
+function declineBkn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) declineBooking(k); }
+function toggleReasonBtn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) toggleReason(k); }
+function approveBkn(btn) { var k=btn.closest('.admin-card').dataset.key; if(k) approveBooking(k); }
+function resetBkn(btn)   { var k=btn.closest('.admin-card').dataset.key; if(k) resetBooking(k); }
+function deleteBkn(btn)  { var k=btn.closest('.admin-card').dataset.key; if(k) deleteBooking(k); }
+function unlockOdoBtn(btn) { var k=btn.closest('.odo-unlock').dataset.key; if(k) unlockOdo(k); }
+function saveOdoBtn(btn)   { var k=btn.closest('.odo-fields').dataset.key; if(k) saveOdo(k); }
+
 // ══ UPDATE IN FIREBASE ══
 function updateBooking(key, updates) {
   return bookingsRef.child(key).update(updates);
@@ -597,7 +608,9 @@ function resetBooking(key) {
   updateBooking(key, {status:'pending', reason:'', approvedAt:''})
     .catch(function(e){ alert('Error: '+e.message); });
 }
-function changeStatus(key) {
+function changeStatus(btn) {
+  var key = btn ? (btn.dataset ? btn.dataset.key : btn) : btn;
+  if (!key) return;
   var sel = document.getElementById('status-sel-'+key);
   if (!sel) return;
   var newStatus = sel.value;
@@ -647,7 +660,7 @@ function renderAdmin() {
   var html='';
   for(var i=0;i<filtered.length;i++){
     var b=filtered[i]; var k=b._key; var isPending=b.status==='pending';
-    html+='<div class="admin-card '+b.status+'">';
+    html+='<div class="admin-card '+b.status+'" data-key=\''+k+'\''>'; 
     html+='<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="ac-site">'+esc(b.site)+'</div><div style="font-size:13px;color:var(--muted)">📅 '+fmtDate(b.date)+' at '+fmtTime(b.time)+'</div></div>';
     if(b.from||b.to) html+='<div class="ac-meta">🚚 <strong>From:</strong> '+esc(b.from||'—')+' → <strong>To:</strong> '+esc(b.to||'—')+'</div>';
     html+='<div class="ac-meta">⏱ '+esc(b.duration)+' · 📦 '+esc(b.loadType)+' · '+badge(b.status)+'</div>';
@@ -662,14 +675,14 @@ function renderAdmin() {
     html+='<option value="approved"'+(b.status==='approved'?' selected':'')+'>Approved</option>';
     html+='<option value="declined"'+(b.status==='declined'?' selected':'')+'>Declined</option>';
     html+='</select>';
-    html+='<button class="btn-status-save" onclick="changeStatus(''+k+'')">Apply</button>';
+    html+='<button class="btn-status-save" onclick="changeStatus(\'' + k + '\')"  >Apply</button>';
     html+='</div>';
     html+='<div class="approve-actions">';
-    if(isPending) html+='<button class="btn-approve" onclick="approveBooking(''+k+'')">✅ Approve</button><button class="btn-decline" onclick="toggleReason(\''+k+'\')">❌ Decline</button>';
-    if(!isPending) html+='<button class="btn-reset" onclick="resetBooking(\''+k+'\')">↩ Reset</button>';
-    html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBooking(\''+k+'\')">🗑 Delete</button>';
+    if(isPending) html+='<button class="btn-approve" onclick="approveBooking(''+k+'')">✅ Approve</button><button class="btn-decline" onclick="toggleReasonBtn(this)">❌ Decline</button>';
+    if(!isPending) html+='<button class="btn-reset" onclick="resetBkn(this)">↩ Reset</button>';
+    html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBkn(this)">🗑 Delete</button>';
     html+='</div>';
-    if(isPending) html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining…"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBooking(\''+k+'\')">Confirm Decline</button></div>';
+    if(isPending) html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining…"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBkn(this)">Confirm Decline</button></div>';
     // ODO readings display or entry
     if (b.status==='approved') {
       if (b.odoSavedAt) {
@@ -683,14 +696,14 @@ function renderAdmin() {
         html+='</div>';
       } else {
         // Show unlock panel for driver
-        html+='<div class="odo-unlock">';
+        html+='<div class="odo-unlock" data-key=\''+k+'\''>'; 
         html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
         html+='<div class="odo-unlock-row">';
-        html+='<input type="password" class="odo-pin-input" id="odo-pin-'+k+'" maxlength="6" placeholder="PIN" onkeydown="if(event.key==='Enter')unlockOdo(''+k+'')">';
+        html+='<input type="password" class="odo-pin-input" id="odo-pin-' + k + '" maxlength="6" placeholder="PIN">';
         html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
         html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
         html+='</div>';
-        html+='<div id="odo-fields-'+k+'" class="odo-fields">';
+        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key=\''+k+'\''>'; 
         html+='<div class="odo-grid">';
         html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
@@ -756,14 +769,14 @@ function renderList() {
         html+='</div>';
       } else {
         // Show unlock panel for driver
-        html+='<div class="odo-unlock">';
+        html+='<div class="odo-unlock" data-key=\''+k+'\''>'; 
         html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
         html+='<div class="odo-unlock-row">';
-        html+='<input type="password" class="odo-pin-input" id="odo-pin-'+k+'" maxlength="6" placeholder="PIN" onkeydown="if(event.key==='Enter')unlockOdo(''+k+'')">';
+        html+='<input type="password" class="odo-pin-input" id="odo-pin-' + k + '" maxlength="6" placeholder="PIN">';
         html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
         html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
         html+='</div>';
-        html+='<div id="odo-fields-'+k+'" class="odo-fields">';
+        html+='<div id="odo-fields-'+k+'" class="odo-fields" data-key=\''+k+'\''>'; 
         html+='<div class="odo-grid">';
         html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
         html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
