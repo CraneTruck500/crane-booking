@@ -209,7 +209,34 @@
   .modal .field { margin-bottom: 16px; }
   .modal .field label { font-size: 13px; }
 
+  /* ODO PANEL */
+  .odo-unlock { margin-top: 10px; }
+  .odo-unlock-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .odo-pin-input { width: 100px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 14px; letter-spacing: 4px; font-weight: 700; text-align: center; outline: none; font-family: inherit; }
+  .odo-pin-input:focus { border-color: var(--brand-mid); }
+  .btn-odo-unlock { background: var(--teal); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .odo-fields { display: none; margin-top: 12px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 8px; padding: 14px 16px; }
+  .odo-fields.visible { display: block; }
+  .odo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .odo-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .odo-field input { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; outline: none; }
+  .odo-field input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(15,118,110,.12); }
+  .odo-saved { background: #CCFBF1; color: #0F766E; border-radius: 7px; padding: 10px 14px; font-size: 13px; font-weight: 600; margin-top: 10px; display: none; }
+  .odo-saved.visible { display: block; }
+  .odo-readings-display { margin-top: 8px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 8px; padding: 12px 14px; font-size: 13px; }
+  .odo-readings-display .odo-row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .odo-readings-display .odo-label { color: var(--muted); font-size: 12px; }
+  .odo-readings-display .odo-val { font-weight: 700; color: #0F766E; }
+
+  /* ADMIN STATUS CHANGE */
+  .status-change-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+  .status-change-row label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .status-select { padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; font-family: inherit; }
+  .status-select:focus { border-color: var(--brand-mid); }
+  .btn-status-save { background: var(--brand); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
   @media (max-width: 520px) {
+    .odo-grid { grid-template-columns: 1fr; }
     .card { padding: 20px 16px; } .card-title-bar { margin: -20px -16px 20px; padding: 18px 18px 14px; }
     .field-row { grid-template-columns: 1fr; }
     .cal-day { min-height: 56px; padding: 4px 3px; } .day-pill { font-size: 9px; }
@@ -427,7 +454,7 @@ var bookingsRef = db.ref('bookings');
 // ══ LOCAL STATE ══
 var allBookings = [];
 var adminUnlocked = false;
-var DEFAULT_PIN = '5005';
+var DEFAULT_PIN = '1234';
 
 function getPin() { return localStorage.getItem('tyris_admin_pin') || DEFAULT_PIN; }
 
@@ -495,7 +522,7 @@ function submitForm() {
   var booking = {
     id: Date.now(), name:name, site:site, from:from, to:to,
     date:date, time:time, duration:duration, loadType:loadType, notes:notes,
-    status:'pending', reason:'', approvedAt:'', completedAt:'',
+    status:'pending', reason:'', approvedAt:'', completedAt:'', truckStart:'', truckEnd:'', craneStart:'', craneEnd:'', odoSavedAt:'',
     submitted: new Date().toISOString()
   };
   bookingsRef.push(booking).then(function() {
@@ -570,6 +597,23 @@ function resetBooking(key) {
   updateBooking(key, {status:'pending', reason:'', approvedAt:''})
     .catch(function(e){ alert('Error: '+e.message); });
 }
+function changeStatus(key) {
+  var sel = document.getElementById('status-sel-'+key);
+  if (!sel) return;
+  var newStatus = sel.value;
+  var b = null;
+  for (var i=0;i<allBookings.length;i++) { if (allBookings[i]._key===key) { b=allBookings[i]; break; } }
+  if (!b) return;
+  if (newStatus === b.status) { showToast('Status is already '+newStatus+'.', '#6B7280'); return; }
+  var updates = { status: newStatus };
+  if (newStatus !== 'declined') updates.reason = '';
+  updates.approvedAt = new Date().toISOString();
+  updateBooking(key, updates).then(function() {
+    var labels = { pending:'Pending', approved:'Approved', declined:'Declined' };
+    showToast('Status changed to '+labels[newStatus]+'!', newStatus==='approved'?'#16A34A':newStatus==='declined'?'#DC2626':'#D97706');
+  }).catch(function(e){ alert('Error: '+e.message); });
+}
+
 function toggleReason(key) {
   var box=document.getElementById('reason-'+key); if(!box) return;
   box.classList.toggle('visible');
@@ -610,12 +654,54 @@ function renderAdmin() {
     if(b.notes) html+='<div class="ac-notes">"'+esc(b.notes)+'"</div>';
     if(b.status==='declined'&&b.reason) html+='<div class="ac-notes" style="color:#991B1B">Reason: '+esc(b.reason)+'</div>';
     html+='<div class="ac-by">Submitted by '+esc(b.name)+' · '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
+    // Status change dropdown for admin
+    html+='<div class="status-change-row">';
+    html+='<label>Change status:</label>';
+    html+='<select class="status-select" id="status-sel-'+k+'">';
+    html+='<option value="pending"'+(b.status==='pending'?' selected':'')+'>Pending</option>';
+    html+='<option value="approved"'+(b.status==='approved'?' selected':'')+'>Approved</option>';
+    html+='<option value="declined"'+(b.status==='declined'?' selected':'')+'>Declined</option>';
+    html+='</select>';
+    html+='<button class="btn-status-save" onclick="changeStatus(''+k+'')">Apply</button>';
+    html+='</div>';
     html+='<div class="approve-actions">';
-    if(isPending) html+='<button class="btn-approve" onclick="approveBooking(\''+k+'\')">✅ Approve</button><button class="btn-decline" onclick="toggleReason(\''+k+'\')">❌ Decline</button>';
+    if(isPending) html+='<button class="btn-approve" onclick="approveBooking(''+k+'')">✅ Approve</button><button class="btn-decline" onclick="toggleReason(\''+k+'\')">❌ Decline</button>';
     if(!isPending) html+='<button class="btn-reset" onclick="resetBooking(\''+k+'\')">↩ Reset</button>';
     html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBooking(\''+k+'\')">🗑 Delete</button>';
     html+='</div>';
     if(isPending) html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining…"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBooking(\''+k+'\')">Confirm Decline</button></div>';
+    // ODO readings display or entry
+    if (b.status==='approved') {
+      if (b.odoSavedAt) {
+        // Show saved readings
+        html+='<div class="odo-readings-display">';
+        html+='<div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
+        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'—')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'—')+' hrs</span></div>';
+        if (b.truckStart && b.truckEnd) html+='<div class="odo-row"><span class="odo-label">Truck Distance</span><span class="odo-val">'+(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1)+' km</span></div>';
+        if (b.craneStart && b.craneEnd) html+='<div class="odo-row"><span class="odo-label">Crane Hours Used</span><span class="odo-val">'+(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1)+' hrs</span></div>';
+        html+='</div>';
+      } else {
+        // Show unlock panel for driver
+        html+='<div class="odo-unlock">';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
+        html+='<div class="odo-unlock-row">';
+        html+='<input type="password" class="odo-pin-input" id="odo-pin-'+k+'" maxlength="6" placeholder="PIN" onkeydown="if(event.key==='Enter')unlockOdo(''+k+'')">';
+        html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
+        html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
+        html+='</div>';
+        html+='<div id="odo-fields-'+k+'" class="odo-fields">';
+        html+='<div class="odo-grid">';
+        html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Crane Start (hrs)</label><input type="number" id="cs-'+k+'" placeholder="e.g. 1204.5" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Crane End (hrs)</label><input type="number" id="ce-'+k+'" placeholder="e.g. 1207.0" step="0.1" min="0"></div>';
+        html+='</div>';
+        html+='<button class="btn-complete" onclick="saveOdo(''+k+'')" style="width:100%">Save Readings</button>';
+        html+='</div>';
+        html+='</div>';
+      }
+    }
     html+='</div>';
   }
   container.innerHTML=html;
@@ -657,6 +743,38 @@ function renderList() {
       if(b.completedAt) html+='<div style="margin-top:10px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
       else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(\''+k+'\')">🏁 Mark as Complete</button></div>';
     }
+    // ODO readings display or entry
+    if (b.status==='approved') {
+      if (b.odoSavedAt) {
+        // Show saved readings
+        html+='<div class="odo-readings-display">';
+        html+='<div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
+        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'—')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'—')+' hrs</span></div>';
+        if (b.truckStart && b.truckEnd) html+='<div class="odo-row"><span class="odo-label">Truck Distance</span><span class="odo-val">'+(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1)+' km</span></div>';
+        if (b.craneStart && b.craneEnd) html+='<div class="odo-row"><span class="odo-label">Crane Hours Used</span><span class="odo-val">'+(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1)+' hrs</span></div>';
+        html+='</div>';
+      } else {
+        // Show unlock panel for driver
+        html+='<div class="odo-unlock">';
+        html+='<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div>';
+        html+='<div class="odo-unlock-row">';
+        html+='<input type="password" class="odo-pin-input" id="odo-pin-'+k+'" maxlength="6" placeholder="PIN" onkeydown="if(event.key==='Enter')unlockOdo(''+k+'')">';
+        html+='<button class="btn-odo-unlock" onclick="unlockOdo(''+k+'')">Unlock</button>';
+        html+='<span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span>';
+        html+='</div>';
+        html+='<div id="odo-fields-'+k+'" class="odo-fields">';
+        html+='<div class="odo-grid">';
+        html+='<div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ts-'+k+'" placeholder="e.g. 45230" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Truck End (km)</label><input type="number" id="te-'+k+'" placeholder="e.g. 45310" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Crane Start (hrs)</label><input type="number" id="cs-'+k+'" placeholder="e.g. 1204.5" step="0.1" min="0"></div>';
+        html+='<div class="odo-field"><label>Crane End (hrs)</label><input type="number" id="ce-'+k+'" placeholder="e.g. 1207.0" step="0.1" min="0"></div>';
+        html+='</div>';
+        html+='<button class="btn-complete" onclick="saveOdo(''+k+'')" style="width:100%">Save Readings</button>';
+        html+='</div>';
+        html+='</div>';
+      }
+    }
     html+='</div>';
   }
   container.innerHTML=html;
@@ -676,7 +794,7 @@ function getExportRows() {
 }
 function exportCSV() {
   var rows=getExportRows(); if(!rows.length){alert('No bookings to export.');return;}
-  var headers=['Submitted','Requested Date','Start Time','Site','From','To','Duration','Load Type','Notes','Status','Decline Reason','Completed At','Submitted By'];
+  var headers=['Submitted','Requested Date','Start Time','Site','From','To','Duration','Load Type','Notes','Status','Decline Reason','Completed At','Truck Start (km)','Truck End (km)','Truck Distance (km)','Crane Start (hrs)','Crane End (hrs)','Crane Hours Used','Submitted By'];
   var lines=[headers.join(',')];
   for(var i=0;i<rows.length;i++){
     var b=rows[i];
@@ -689,7 +807,7 @@ function exportCSV() {
 }
 function exportExcel() {
   var rows=getExportRows(); if(!rows.length){alert('No bookings to export.');return;}
-  var headers=['Submitted','Requested Date','Start Time','Site','From','To','Duration','Load Type','Notes','Status','Decline Reason','Completed At','Submitted By'];
+  var headers=['Submitted','Requested Date','Start Time','Site','From','To','Duration','Load Type','Notes','Status','Decline Reason','Completed At','Truck Start (km)','Truck End (km)','Truck Distance (km)','Crane Start (hrs)','Crane End (hrs)','Crane Hours Used','Submitted By'];
   function hCell(v){return '<Cell ss:StyleID="h"><Data ss:Type="String">'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</Data></Cell>';}
   function dCell(v){return '<Cell ss:StyleID="d"><Data ss:Type="String">'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</Data></Cell>';}
   var xmlRows='<Row>'+headers.map(hCell).join('')+'</Row>\n';
@@ -702,6 +820,37 @@ function exportExcel() {
   var blob=new Blob([xml],{type:'application/vnd.ms-excel'});
   var url=URL.createObjectURL(blob); var a=document.createElement('a');
   a.href=url; a.download='Tyris_Crane_Bookings_'+todayStr()+'.xls'; a.click(); URL.revokeObjectURL(url);
+}
+
+// == DRIVER ODO ==
+var DRIVER_PIN = '6512';
+
+function unlockOdo(key) {
+  var pin = document.getElementById('odo-pin-'+key);
+  if (!pin) return;
+  if (pin.value === DRIVER_PIN) {
+    document.getElementById('odo-fields-'+key).classList.add('visible');
+    pin.style.display = 'none';
+    pin.nextElementSibling.style.display = 'none';
+  } else {
+    pin.value = '';
+    pin.placeholder = 'Wrong PIN';
+    pin.style.borderColor = '#DC2626';
+    setTimeout(function(){ pin.placeholder='PIN'; pin.style.borderColor=''; }, 2000);
+  }
+}
+
+function saveOdo(key) {
+  var ts = document.getElementById('ts-'+key) ? document.getElementById('ts-'+key).value.trim() : '';
+  var te = document.getElementById('te-'+key) ? document.getElementById('te-'+key).value.trim() : '';
+  var cs = document.getElementById('cs-'+key) ? document.getElementById('cs-'+key).value.trim() : '';
+  var ce = document.getElementById('ce-'+key) ? document.getElementById('ce-'+key).value.trim() : '';
+  if (!ts && !te && !cs && !ce) { alert('Please enter at least one reading.'); return; }
+  if (ts && te && parseFloat(te) < parseFloat(ts)) { alert('Truck End reading cannot be less than Start reading.'); return; }
+  if (cs && ce && parseFloat(ce) < parseFloat(cs)) { alert('Crane End reading cannot be less than Start reading.'); return; }
+  updateBooking(key, { truckStart:ts, truckEnd:te, craneStart:cs, craneEnd:ce, odoSavedAt:new Date().toISOString() })
+    .then(function(){ showToast('Readings saved!', '#0F766E'); })
+    .catch(function(e){ alert('Error: '+e.message); });
 }
 
 // == EDIT MODAL ==
