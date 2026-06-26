@@ -539,11 +539,15 @@ function renderAdmin(){
     if(isPending)html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining…"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBkn(this)">Confirm Decline</button></div>';
     if(b.status==='approved'){
       if(b.odoSavedAt){
-        html+='<div class="odo-readings-display"><div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
+        html+='<div class="odo-readings-display"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-weight:700;font-size:12px;color:#0F766E">Odometer / Hour Readings</span><button style="font-size:11px;padding:4px 10px;background:#FEF3C7;color:#92400E;border:none;border-radius:5px;cursor:pointer" onclick="editOdo(this.dataset.key)" data-key="'+k+'">✏️ Edit</button></div>
         html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
         html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'—')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'—')+' hrs</span></div>';
         if(b.truckStart&&b.truckEnd)html+='<div class="odo-row"><span class="odo-label">Truck Distance</span><span class="odo-val">'+(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1)+' km</span></div>';
         if(b.craneStart&&b.craneEnd)html+='<div class="odo-row"><span class="odo-label">Crane Hours Used</span><span class="odo-val">'+(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1)+' hrs</span></div>';
+        html+='<div id="odo-edit-'+k+'" style="display:none;margin-top:10px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:8px;padding:12px">';
+html+='<div class="odo-grid"><div class="odo-field"><label>Truck Start (km)</label><input type="number" id="ets-'+k+'" value="'+(b.truckStart||'')+'" step="0.1" min="0"></div><div class="odo-field"><label>Truck End (km)</label><input type="number" id="ete-'+k+'" value="'+(b.truckEnd||'')+'" step="0.1" min="0"></div><div class="odo-field"><label>Crane Start (hrs)</label><input type="number" id="ecs-'+k+'" value="'+(b.craneStart||'')+'" step="0.1" min="0"></div><div class="odo-field"><label>Crane End (hrs)</label><input type="number" id="ece-'+k+'" value="'+(b.craneEnd||'')+'" step="0.1" min="0"></div></div>';
+html+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn-complete" onclick="saveOdoEdit(this.dataset.key)" data-key="'+k+'">Save</button><button class="btn-reset" onclick="cancelOdoEdit(this.dataset.key)" data-key="'+k+'">Cancel</button></div>';
+html+='</div>';
         html+='</div>';
       }else{
         html+='<div class="odo-unlock" data-key="'+k+'"><div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">Enter Odometer / Hour Readings</div><div class="odo-unlock-row"><input type="password" class="odo-pin-input" id="odo-pin-'+k+'" maxlength="6" placeholder="PIN"><button class="btn-odo-unlock" onclick="unlockOdoBtn(this)">Unlock</button><span style="font-size:11px;color:var(--muted)">(Driver PIN required)</span></div>';
@@ -644,7 +648,24 @@ function unlockOdo(key){
   if(pin.value===DRIVER_PIN){document.getElementById('odo-fields-'+key).classList.add('visible');pin.style.display='none';pin.nextElementSibling.style.display='none';}
   else{pin.value='';pin.placeholder='Wrong PIN';pin.style.borderColor='#DC2626';setTimeout(function(){pin.placeholder='PIN';pin.style.borderColor='';},2000);}
 }
-function saveOdo(key){
+function editOdo(key) {
+  document.getElementById('odo-edit-'+key).style.display='block';
+}
+function cancelOdoEdit(key) {
+  document.getElementById('odo-edit-'+key).style.display='none';
+}
+function saveOdoEdit(key) {
+  var ts=document.getElementById('ets-'+key).value.trim();
+  var te=document.getElementById('ete-'+key).value.trim();
+  var cs=document.getElementById('ecs-'+key).value.trim();
+  var ce=document.getElementById('ece-'+key).value.trim();
+  if(ts&&te&&parseFloat(te)<parseFloat(ts)){alert('Truck End cannot be less than Start.');return;}
+  if(cs&&ce&&parseFloat(ce)<parseFloat(cs)){alert('Crane End cannot be less than Start.');return;}
+  updateBooking(key,{truckStart:ts,truckEnd:te,craneStart:cs,craneEnd:ce,odoSavedAt:new Date().toISOString()})
+    .then(function(){showToast('Readings updated!','#0F766E');})
+    .catch(function(e){alert('Error: '+e.message);});
+}
+  function saveOdo(key){
   var ts=document.getElementById('ts-'+key)?document.getElementById('ts-'+key).value.trim():'';
   var te=document.getElementById('te-'+key)?document.getElementById('te-'+key).value.trim():'';
   var cs=document.getElementById('cs-'+key)?document.getElementById('cs-'+key).value.trim():'';
