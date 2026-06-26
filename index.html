@@ -740,7 +740,7 @@ function renderCalendar(){
     var pills='';
     for(var p=0;p<Math.min(bks.length,2);p++){var bk=bks[p];var short=bk.site.length>10?bk.site.substring(0,10)+'…':bk.site;var dc=bk.status==='declined'?' pill-declined':'';pills+='<div class="day-pill '+pillCls(bk.loadType)+dc+'">'+esc(short)+'</div>';}
     if(bks.length>2)pills+='<div class="day-more">+'+(bks.length-2)+' more</div>';
-    var click=bks.length?'onclick="showDay(''+dateStr+'')"':'';
+    var click=bks.length?'onclick="showDay(\''+dateStr+'\')"':'';
     html+='<div class="'+cls+'" '+click+'><div class="day-num">'+label+'</div><div class="day-bookings">'+pills+'</div></div>';
   }
   document.getElementById('cal-days').innerHTML=html;
