@@ -581,10 +581,10 @@ function renderList(){
     if(b.notes)html+='<div class="bc-notes">"'+esc(b.notes)+'"</div>';
     if(b.status==='declined'&&b.reason)html+='<div class="bc-reason">❌ Reason: '+esc(b.reason)+'</div>';
     html+='<div class="bc-submitter">Submitted by '+esc(b.name)+' · '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
-    if(b.status==='pending')html+='<div style="margin-top:10px"><button class="btn-ghost" style="padding:7px 16px;font-size:13px" onclick="openEditModal(''+k+'')">Edit Booking</button></div>';
+    if(b.status==='pending')html+='<div style="margin-top:10px"><button class="btn-ghost" style="padding:7px 16px;font-size:13px" onclick="openEditModal(this.getAttribute(\'data-key\'))" data-key="'+k+'">Edit Booking</button></div>';
     if(b.status==='approved'){
       if(b.completedAt)html+='<div style="margin-top:10px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
-      else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(''+k+'')">🏁 Mark as Complete</button></div>';
+      else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(this.getAttribute('data-key'))" data-key="'+k+'">🏁 Mark as Complete</button></div>';
       if(b.odoSavedAt){
         html+='<div class="odo-readings-display"><div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
         html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
