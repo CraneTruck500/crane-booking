@@ -1,34 +1,9 @@
-
-<div style="padding: 2rem 0; text-align: center;">
-  <h2 style="font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 8px;">Crane Truck Booking System</h2>
-  <p style="font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem;">Complete file with Start/End Time, Clash Detection, Admin PIN 5005, Driver PIN 6512</p>
-  <button id="dlBtn" onclick="downloadFile()" style="font-size: 15px; padding: 10px 28px;">
-    <i class="ti ti-download" aria-hidden="true" style="margin-right: 6px;"></i> Download index.html
-  </button>
-  <p id="status" style="margin-top: 1rem; font-size: 13px; color: var(--color-text-secondary);"></p>
-</div>
-
-<script>
-function downloadFile() {
-  document.getElementById('status').textContent = 'Generating file…';
-  var html = getHTML();
-  var blob = new Blob([html], {type: 'text/html'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'index.html';
-  a.click();
-  URL.revokeObjectURL(url);
-  document.getElementById('status').textContent = '✓ Downloaded! Upload this file to GitHub as index.html';
-}
-
-function getHTML() {
-return `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crane Truck Booking System \u2013 Tyris Gauteng</title>
+<title>Crane Truck Booking System – Tyris Gauteng</title>
 <style>
   :root {
     --brand:#1B3F8B;--brand-mid:#1B4FA8;--brand-lite:#E8EEF8;
@@ -211,14 +186,14 @@ return `<!DOCTYPE html>
 </style>
 </head>
 <body>
-<div id="loading"><div class="spinner"></div><p>Connecting to database\u2026</p></div>
+<div id="loading"><div class="spinner"></div><p>Connecting to database…</p></div>
 <header>
-  <div class="header-subtitle">Tyris <span>\u00b7 Gauteng</span><span class="sub2">Crane Truck Bookings</span></div>
+  <div class="header-subtitle">Tyris <span>· Gauteng</span><span class="sub2">Crane Truck Bookings</span></div>
   <nav>
     <button class="active" id="tab-form" onclick="switchView('form')">New Booking</button>
     <button id="tab-calendar" onclick="switchView('calendar')">Calendar</button>
     <button id="tab-list" onclick="switchView('list')">Submissions</button>
-    <button id="tab-admin" onclick="switchView('admin')">\uD83D\uDD12 <span class="admin-label">Approvals</span></button>
+    <button id="tab-admin" onclick="switchView('admin')">🔒 <span class="admin-label">Approvals</span></button>
   </nav>
 </header>
 <main>
@@ -243,10 +218,10 @@ return `<!DOCTYPE html>
           <label><input type="radio" name="loadtype" value="Container"> Container</label>
           <label><input type="radio" name="loadtype" value="Plant / Machinery"> Plant / Machinery</label>
           <label><input type="radio" name="loadtype" value="Materials"> Materials (Bricks, tiles, etc.)</label>
-          <label><input type="radio" name="loadtype" value="Other"> Other <input type="text" class="other-input" id="load-other-text" placeholder="Please specify\u2026" maxlength="80"></label>
+          <label><input type="radio" name="loadtype" value="Other"> Other <input type="text" class="other-input" id="load-other-text" placeholder="Please specify…" maxlength="80"></label>
         </div>
       </div>
-      <div class="field"><label for="f-notes">Description / Notes</label><textarea id="f-notes" placeholder="Any special requirements, access instructions, or additional details\u2026"></textarea></div>
+      <div class="field"><label for="f-notes">Description / Notes</label><textarea id="f-notes" placeholder="Any special requirements, access instructions, or additional details…"></textarea></div>
       <div class="form-actions">
         <button class="btn-primary" onclick="submitForm()">Submit Booking</button>
         <button class="btn-ghost" onclick="clearForm()">Clear Form</button>
@@ -281,22 +256,22 @@ return `<!DOCTYPE html>
       <div class="stat"><div class="num" id="st-upcoming">0</div><div class="lbl">Upcoming</div></div>
     </div>
     <div class="filters">
-      <input type="text" id="f-search" placeholder="\uD83D\uDD0D Search site or name\u2026" oninput="renderList()">
+      <input type="text" id="f-search" placeholder="🔍 Search site or name…" oninput="renderList()">
       <select id="f-status" onchange="renderList()"><option value="">All Statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="declined">Declined</option></select>
     </div>
     <div class="booking-list" id="booking-list"></div>
     <div class="export-bar" id="export-bar" style="display:none">
       <span class="export-label">Export records:</span>
-      <button class="btn-export btn-csv" onclick="exportCSV()">\u2b07 Download CSV</button>
-      <button class="btn-export btn-xlsx" onclick="exportExcel()">\u2b07 Download Excel</button>
+      <button class="btn-export btn-csv" onclick="exportCSV()">⬇ Download CSV</button>
+      <button class="btn-export btn-xlsx" onclick="exportExcel()">⬇ Download Excel</button>
     </div>
   </div>
   <div id="view-admin" class="view">
     <div id="admin-login" class="pin-wrap">
-      <div style="font-size:40px;margin-bottom:12px">\uD83D\uDD10</div>
+      <div style="font-size:40px;margin-bottom:12px">🔐</div>
       <h2>Approver Access</h2>
       <p>Enter your PIN to access the approval panel.</p>
-      <input type="password" class="pin-input" id="pin-input" maxlength="6" placeholder="\u2022\u2022\u2022\u2022"
+      <input type="password" class="pin-input" id="pin-input" maxlength="6" placeholder="••••"
         oninput="document.getElementById('pin-error').textContent=''"
         onkeydown="if(event.key==='Enter')checkPin()">
       <div class="pin-error" id="pin-error"></div>
@@ -304,7 +279,7 @@ return `<!DOCTYPE html>
     </div>
     <div id="admin-panel" style="display:none">
       <div class="admin-header">
-        <div><h2>\uD83D\uDEE0 Approvals Panel</h2><p>Review and action pending booking requests</p></div>
+        <div><h2>🛠 Approvals Panel</h2><p>Review and action pending booking requests</p></div>
         <button class="btn-logout" onclick="adminLogout()">Lock Panel</button>
       </div>
       <div class="admin-stats">
@@ -313,7 +288,7 @@ return `<!DOCTYPE html>
         <div class="adm-stat decl"><div class="num" id="adm-decl">0</div><div class="lbl">Declined</div></div>
       </div>
       <div class="admin-filter">
-        <input type="text" id="adm-search" placeholder="\uD83D\uDD0D Search\u2026" oninput="renderAdmin()">
+        <input type="text" id="adm-search" placeholder="🔍 Search…" oninput="renderAdmin()">
         <select id="adm-status" onchange="renderAdmin()">
           <option value="pending">Pending only</option>
           <option value="">All statuses</option>
@@ -371,8 +346,8 @@ return `<!DOCTYPE html>
   </div>
 </div>
 <div id="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"><\/script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 var firebaseConfig={apiKey:"AIzaSyD68zIJdJcaAjqmCEnd_f4wlr8O_7vO38M",authDomain:"tyris-crane-booking.firebaseapp.com",databaseURL:"https://tyris-crane-booking-default-rtdb.europe-west1.firebasedatabase.app",projectId:"tyris-crane-booking",storageBucket:"tyris-crane-booking.firebasestorage.app",messagingSenderId:"557970814071",appId:"1:557970814071:web:6e886e2cba940c61fcc272"};
 firebase.initializeApp(firebaseConfig);
@@ -437,7 +412,7 @@ function liveClashCheck(){
   var alert=document.getElementById('clash-alert');
   if(date&&time&&endtime&&endtime>time){
     var clash=checkClash(date,time,endtime,null);
-    if(clash){alert.style.display='block';alert.textContent='\u26a0\ufe0f Time clash! '+clash.site+' is already approved '+fmtTime(clash.time)+' \u2013 '+fmtTime(clash.endtime||'')+'.';}
+    if(clash){alert.style.display='block';alert.textContent='⚠️ Time clash! '+clash.site+' is already approved '+fmtTime(clash.time)+' – '+fmtTime(clash.endtime||'')+'.';}
     else{alert.style.display='none';}
   }else{alert.style.display='none';}
 }
@@ -461,14 +436,14 @@ function submitForm(){
   if(!time)errs.push('Start Time');
   if(!endtime)errs.push('End Time');
   if(!loadEl)errs.push('Load Type');
-  if(errs.length){alert('Please complete:\\n\u2022 '+errs.join('\\n\u2022 '));return;}
+  if(errs.length){alert('Please complete:\n• '+errs.join('\n• '));return;}
   if(endtime<=time){alert('End Time must be after Start Time.');return;}
   var clash=checkClash(date,time,endtime,null);
-  if(clash){alert('\u26a0\ufe0f Booking clash!\\n\\nThe crane truck is already approved for:\\n\u2022 '+clash.site+' on '+fmtDate(clash.date)+' from '+fmtTime(clash.time)+' to '+fmtTime(clash.endtime||'')+'\\n\\nPlease choose a different time.');return;}
+  if(clash){alert('⚠️ Booking clash!\n\nThe crane truck is already approved for:\n• '+clash.site+' on '+fmtDate(clash.date)+' from '+fmtTime(clash.time)+' to '+fmtTime(clash.endtime||'')+'\n\nPlease choose a different time.');return;}
   var loadType=loadEl.value;
   if(loadType==='Other'){var ot=document.getElementById('load-other-text').value.trim();loadType=ot?'Other: '+ot:'Other';}
   var booking={id:Date.now(),name:name,site:site,from:from,to:to,date:date,time:time,endtime:endtime,loadType:loadType,notes:notes,status:'pending',reason:'',approvedAt:'',completedAt:'',truckStart:'',truckEnd:'',craneStart:'',craneEnd:'',odoSavedAt:'',submitted:new Date().toISOString()};
-  bookingsRef.push(booking).then(function(){showToast('\u2713 Booking submitted! Awaiting approval.','#1B4FA8');clearForm();}).catch(function(e){alert('Error: '+e.message);});
+  bookingsRef.push(booking).then(function(){showToast('✓ Booking submitted! Awaiting approval.','#1B4FA8');clearForm();}).catch(function(e){alert('Error: '+e.message);});
 }
 
 function clearForm(){
@@ -480,12 +455,12 @@ function clearForm(){
 }
 
 function showToast(msg,bg){var t=document.getElementById('toast');t.textContent=msg;t.style.background=bg||'#16A34A';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3200);}
-function fmtDate(d){if(!d)return'\u2014';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function fmtDate(d){if(!d)return'—';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function fmtTime(t){if(!t)return'';var p=t.split(':');var h=parseInt(p[0]);return(h%12||12)+':'+p[1]+' '+(h<12?'AM':'PM');}
 function todayStr(){return new Date().toISOString().split('T')[0];}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function pillCls(lt){if(!lt)return'';var l=lt.toLowerCase();if(l.indexOf('container')===0)return'pill-container';if(l.indexOf('plant')===0)return'pill-plant';if(l.indexOf('materials')===0)return'pill-materials';return'pill-other';}
-function badge(s){var m={pending:'\u23f3 Pending',approved:'\u2705 Approved',declined:'\u274c Declined'};return '<span class="badge '+s+'">'+(m[s]||s)+'</span>';}
+function badge(s){var m={pending:'⏳ Pending',approved:'✅ Approved',declined:'❌ Declined'};return '<span class="badge '+s+'">'+(m[s]||s)+'</span>';}
 function pad(n){return String(n).padStart(2,'0');}
 
 function declineBkn(btn){var k=btn.closest('.admin-card').dataset.key;if(k)declineBooking(k);}
@@ -514,11 +489,11 @@ function approveBooking(key){
   var b=null;for(var i=0;i<allBookings.length;i++){if(allBookings[i]._key===key){b=allBookings[i];break;}}
   if(b&&b.endtime){
     var clash=checkClash(b.date,b.time,b.endtime,key);
-    if(clash){if(!confirm('\u26a0\ufe0f Clash detected!\\n\\nThis booking overlaps with an approved booking:\\n\u2022 '+clash.site+' from '+fmtTime(clash.time)+' to '+fmtTime(clash.endtime||'')+'\\n\\nApprove anyway?'))return;}
+    if(clash){if(!confirm('⚠️ Clash detected!\n\nThis booking overlaps with an approved booking:\n• '+clash.site+' from '+fmtTime(clash.time)+' to '+fmtTime(clash.endtime||'')+'\n\nApprove anyway?'))return;}
   }
-  updateBooking(key,{status:'approved',reason:'',approvedAt:new Date().toISOString()}).then(function(){showToast('\u2705 Booking approved!','#16A34A');}).catch(function(e){alert('Error: '+e.message);});
+  updateBooking(key,{status:'approved',reason:'',approvedAt:new Date().toISOString()}).then(function(){showToast('✅ Booking approved!','#16A34A');}).catch(function(e){alert('Error: '+e.message);});
 }
-function declineBooking(key){var inp=document.getElementById('reason-'+key);var reason=inp?inp.value.trim():'';updateBooking(key,{status:'declined',reason:reason,approvedAt:new Date().toISOString()}).then(function(){showToast('\u274c Booking declined.','#DC2626');}).catch(function(e){alert('Error: '+e.message);});}
+function declineBooking(key){var inp=document.getElementById('reason-'+key);var reason=inp?inp.value.trim():'';updateBooking(key,{status:'declined',reason:reason,approvedAt:new Date().toISOString()}).then(function(){showToast('❌ Booking declined.','#DC2626');}).catch(function(e){alert('Error: '+e.message);});}
 function resetBooking(key){updateBooking(key,{status:'pending',reason:'',approvedAt:''}).catch(function(e){alert('Error: '+e.message);});}
 function changeStatus(key,newStatus){
   var b=null;for(var i=0;i<allBookings.length;i++){if(allBookings[i]._key===key){b=allBookings[i];break;}}
@@ -530,7 +505,7 @@ function changeStatus(key,newStatus){
 }
 function toggleReason(key){var box=document.getElementById('reason-'+key);if(!box)return;box.classList.toggle('visible');var conf=document.getElementById('conf-'+key);if(conf)conf.style.display=box.classList.contains('visible')?'block':'none';if(box.classList.contains('visible'))box.focus();}
 function deleteBooking(key){if(!confirm('Permanently delete this booking?'))return;bookingsRef.child(key).remove().catch(function(e){alert('Error: '+e.message);});}
-function completeBooking(key){if(!confirm('Mark this trip as completed?'))return;updateBooking(key,{completedAt:new Date().toISOString()}).then(function(){showToast('\uD83C\uDFC1 Trip marked as completed!','#0F766E');}).catch(function(e){alert('Error: '+e.message);});}
+function completeBooking(key){if(!confirm('Mark this trip as completed?'))return;updateBooking(key,{completedAt:new Date().toISOString()}).then(function(){showToast('🏁 Trip marked as completed!','#0F766E');}).catch(function(e){alert('Error: '+e.message);});}
 
 function renderAdmin(){
   var search=(document.getElementById('adm-search')?document.getElementById('adm-search').value:'').toLowerCase();
@@ -543,30 +518,30 @@ function renderAdmin(){
   if(search)filtered=filtered.filter(function(b){return b.site.toLowerCase().indexOf(search)>=0||b.name.toLowerCase().indexOf(search)>=0;});
   filtered.sort(function(a,b){return a.date.localeCompare(b.date)||a.id-b.id;});
   var container=document.getElementById('admin-list');
-  if(!filtered.length){container.innerHTML='<div class="empty-state"><div class="icon">'+(sf==='pending'?'\uD83C\uDF89':'\uD83D\uDCCB')+'</div><p>'+(sf==='pending'?'No pending bookings \u2014 all clear!':'No bookings match your filter.')+'</p></div>';return;}
+  if(!filtered.length){container.innerHTML='<div class="empty-state"><div class="icon">'+(sf==='pending'?'🎉':'📋')+'</div><p>'+(sf==='pending'?'No pending bookings — all clear!':'No bookings match your filter.')+'</p></div>';return;}
   var html='';
   for(var i=0;i<filtered.length;i++){
     var b=filtered[i];var k=b._key;var isPending=b.status==='pending';
     html+='<div class="admin-card '+b.status+'" data-key="'+k+'">';
-    html+='<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="ac-site">'+esc(b.site)+'</div><div style="font-size:13px;color:var(--muted)">\uD83D\uDCC5 '+fmtDate(b.date)+'</div></div>';
-    html+='<div class="ac-meta">\uD83D\uDD50 '+fmtTime(b.time)+' \u2013 '+fmtTime(b.endtime||'')+'</div>';
-    if(b.from||b.to)html+='<div class="ac-meta">\uD83D\uDE9A <strong>From:</strong> '+esc(b.from||'\u2014')+' \u2192 <strong>To:</strong> '+esc(b.to||'\u2014')+'</div>';
-    html+='<div class="ac-meta">\uD83D\uDCE6 '+esc(b.loadType)+' \u00b7 '+badge(b.status)+'</div>';
+    html+='<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="ac-site">'+esc(b.site)+'</div><div style="font-size:13px;color:var(--muted)">📅 '+fmtDate(b.date)+'</div></div>';
+    html+='<div class="ac-meta">🕐 '+fmtTime(b.time)+' – '+fmtTime(b.endtime||'')+'</div>';
+    if(b.from||b.to)html+='<div class="ac-meta">🚚 <strong>From:</strong> '+esc(b.from||'—')+' → <strong>To:</strong> '+esc(b.to||'—')+'</div>';
+    html+='<div class="ac-meta">📦 '+esc(b.loadType)+' · '+badge(b.status)+'</div>';
     if(b.notes)html+='<div class="ac-notes">"'+esc(b.notes)+'"</div>';
     if(b.status==='declined'&&b.reason)html+='<div class="ac-notes" style="color:#991B1B">Reason: '+esc(b.reason)+'</div>';
-    html+='<div class="ac-by">Submitted by '+esc(b.name)+' \u00b7 '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
+    html+='<div class="ac-by">Submitted by '+esc(b.name)+' · '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
     html+='<div class="status-change-row"><label>Change status:</label><select class="status-select" id="status-sel-'+k+'"><option value="pending"'+(b.status==='pending'?' selected':'')+'>Pending</option><option value="approved"'+(b.status==='approved'?' selected':'')+'>Approved</option><option value="declined"'+(b.status==='declined'?' selected':'')+'>Declined</option></select><button class="btn-status-save" onclick="changeStatusBtn(this)">Apply</button></div>';
     html+='<div class="approve-actions">';
-    if(isPending)html+='<button class="btn-approve" onclick="approveBkn(this)">\u2705 Approve</button><button class="btn-decline" onclick="toggleReasonBtn(this)">\u274c Decline</button>';
-    if(!isPending)html+='<button class="btn-reset" onclick="resetBkn(this)">\u21a9 Reset</button>';
-    html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBkn(this)">\uD83D\uDDD1 Delete</button>';
+    if(isPending)html+='<button class="btn-approve" onclick="approveBkn(this)">✅ Approve</button><button class="btn-decline" onclick="toggleReasonBtn(this)">❌ Decline</button>';
+    if(!isPending)html+='<button class="btn-reset" onclick="resetBkn(this)">↩ Reset</button>';
+    html+='<button class="btn-reset" style="margin-left:auto;color:#DC2626" onclick="deleteBkn(this)">🗑 Delete</button>';
     html+='</div>';
-    if(isPending)html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining\u2026"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBkn(this)">Confirm Decline</button></div>';
+    if(isPending)html+='<input type="text" class="reason-input" id="reason-'+k+'" placeholder="Optional: reason for declining…"><div class="confirm-decline" id="conf-'+k+'"><button class="btn-decline" style="width:100%;margin-top:8px" onclick="declineBkn(this)">Confirm Decline</button></div>';
     if(b.status==='approved'){
       if(b.odoSavedAt){
         html+='<div class="odo-readings-display"><div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
-        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'\u2014')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'\u2014')+' km</span></div>';
-        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'\u2014')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'\u2014')+' hrs</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'—')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'—')+' hrs</span></div>';
         if(b.truckStart&&b.truckEnd)html+='<div class="odo-row"><span class="odo-label">Truck Distance</span><span class="odo-val">'+(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1)+' km</span></div>';
         if(b.craneStart&&b.craneEnd)html+='<div class="odo-row"><span class="odo-label">Crane Hours Used</span><span class="odo-val">'+(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1)+' hrs</span></div>';
         html+='</div>';
@@ -595,25 +570,25 @@ function renderList(){
   filtered.sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
   document.getElementById('export-bar').style.display=filtered.length?'flex':'none';
   var container=document.getElementById('booking-list');
-  if(!filtered.length){container.innerHTML='<div class="empty-state"><div class="icon">\uD83D\uDCCB</div><p>'+(allBookings.length?'No bookings match your filters.':'No bookings yet. Submit the first one!')+'</p></div>';return;}
+  if(!filtered.length){container.innerHTML='<div class="empty-state"><div class="icon">📋</div><p>'+(allBookings.length?'No bookings match your filters.':'No bookings yet. Submit the first one!')+'</p></div>';return;}
   var html='';
   for(var i=0;i<filtered.length;i++){
     var b=filtered[i];var k=b._key;
     html+='<div class="booking-card status-'+b.status+'">';
-    html+='<div class="bc-header"><div class="bc-site">'+esc(b.site)+'</div><div class="bc-date">\uD83D\uDCC5 '+fmtDate(b.date)+'</div></div>';
-    if(b.from||b.to)html+='<div class="bc-route">\uD83D\uDE9A <strong>From:</strong> '+esc(b.from||'\u2014')+' \u2192 <strong>To:</strong> '+esc(b.to||'\u2014')+'</div>';
-    html+='<div class="bc-meta"><span class="tag time">\uD83D\uDD50 '+fmtTime(b.time)+' \u2013 '+fmtTime(b.endtime||'')+'</span><span class="tag load">\uD83D\uDCE6 '+esc(b.loadType)+'</span>'+badge(b.status)+'</div>';
+    html+='<div class="bc-header"><div class="bc-site">'+esc(b.site)+'</div><div class="bc-date">📅 '+fmtDate(b.date)+'</div></div>';
+    if(b.from||b.to)html+='<div class="bc-route">🚚 <strong>From:</strong> '+esc(b.from||'—')+' → <strong>To:</strong> '+esc(b.to||'—')+'</div>';
+    html+='<div class="bc-meta"><span class="tag time">🕐 '+fmtTime(b.time)+' – '+fmtTime(b.endtime||'')+'</span><span class="tag load">📦 '+esc(b.loadType)+'</span>'+badge(b.status)+'</div>';
     if(b.notes)html+='<div class="bc-notes">"'+esc(b.notes)+'"</div>';
-    if(b.status==='declined'&&b.reason)html+='<div class="bc-reason">\u274c Reason: '+esc(b.reason)+'</div>';
-    html+='<div class="bc-submitter">Submitted by '+esc(b.name)+' \u00b7 '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
-    if(b.status==='pending')html+='<div style="margin-top:10px"><button class="btn-ghost" style="padding:7px 16px;font-size:13px" onclick="openEditModal(\''+k+'\')">Edit Booking</button></div>';
+    if(b.status==='declined'&&b.reason)html+='<div class="bc-reason">❌ Reason: '+esc(b.reason)+'</div>';
+    html+='<div class="bc-submitter">Submitted by '+esc(b.name)+' · '+new Date(b.submitted).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</div>';
+    if(b.status==='pending')html+='<div style="margin-top:10px"><button class="btn-ghost" style="padding:7px 16px;font-size:13px" onclick="openEditModal(''+k+'')">Edit Booking</button></div>';
     if(b.status==='approved'){
-      if(b.completedAt)html+='<div style="margin-top:10px"><span class="completed-stamp">\uD83C\uDFC1 Completed \u00b7 '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
-      else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(\''+k+'\')">\uD83C\uDFC1 Mark as Complete</button></div>';
+      if(b.completedAt)html+='<div style="margin-top:10px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
+      else html+='<div style="margin-top:10px"><button class="btn-complete" onclick="completeBooking(''+k+'')">🏁 Mark as Complete</button></div>';
       if(b.odoSavedAt){
         html+='<div class="odo-readings-display"><div style="font-weight:700;font-size:12px;color:#0F766E;margin-bottom:6px">Odometer / Hour Readings</div>';
-        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'\u2014')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'\u2014')+' km</span></div>';
-        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'\u2014')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'\u2014')+' hrs</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Truck Start</span><span class="odo-val">'+(b.truckStart||'—')+' km</span><span class="odo-label">Truck End</span><span class="odo-val">'+(b.truckEnd||'—')+' km</span></div>';
+        html+='<div class="odo-row"><span class="odo-label">Crane Start</span><span class="odo-val">'+(b.craneStart||'—')+' hrs</span><span class="odo-label">Crane End</span><span class="odo-val">'+(b.craneEnd||'—')+' hrs</span></div>';
         if(b.truckStart&&b.truckEnd)html+='<div class="odo-row"><span class="odo-label">Truck Distance</span><span class="odo-val">'+(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1)+' km</span></div>';
         if(b.craneStart&&b.craneEnd)html+='<div class="odo-row"><span class="odo-label">Crane Hours Used</span><span class="odo-val">'+(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1)+' hrs</span></div>';
         html+='</div>';
@@ -645,7 +620,7 @@ function exportCSV(){
     var cols=[new Date(b.submitted).toLocaleString('en-ZA'),fmtDate(b.date),fmtTime(b.time),fmtTime(b.endtime||''),b.site,b.from||'',b.to||'',b.loadType,b.notes||'',b.status,b.reason||'',b.completedAt?new Date(b.completedAt).toLocaleString('en-ZA'):'',b.truckStart||'',b.truckEnd||'',b.truckStart&&b.truckEnd?(parseFloat(b.truckEnd)-parseFloat(b.truckStart)).toFixed(1):'',b.craneStart||'',b.craneEnd||'',b.craneStart&&b.craneEnd?(parseFloat(b.craneEnd)-parseFloat(b.craneStart)).toFixed(1):'',b.name].map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';});
     lines.push(cols.join(','));
   }
-  var blob=new Blob([lines.join('\\n')],{type:'text/csv'});
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
   var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='Tyris_Crane_Bookings_'+todayStr()+'.csv';a.click();URL.revokeObjectURL(url);
 }
 function exportExcel(){
@@ -653,11 +628,11 @@ function exportExcel(){
   var headers=['Submitted','Date','Start Time','End Time','Site','From','To','Load Type','Notes','Status','Decline Reason','Completed At','Truck Start (km)','Truck End (km)','Truck Distance (km)','Crane Start (hrs)','Crane End (hrs)','Crane Hours Used','Submitted By'];
   function hCell(v){return '<Cell ss:StyleID="h"><Data ss:Type="String">'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</Data></Cell>';}
   function dCell(v){return '<Cell ss:StyleID="d"><Data ss:Type="String">'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</Data></Cell>';}
-  var xmlRows='<Row>'+headers.map(hCell).join('')+'</Row>\\n';
+  var xmlRows='<Row>'+headers.map(hCell).join('')+'</Row>\n';
   for(var i=0;i<rows.length;i++){
     var b=rows[i];
     var cols=[new Date(b.submitted).toLocaleString('en-ZA'),fmtDate(b.date),fmtTime(b.time),fmtTime(b.endtime||''),b.site,b.from||'',b.to||'',b.loadType,b.notes||'',b.status,b.reason||'',b.completedAt?new Date(b.completedAt).toLocaleString('en-ZA'):'',b.name];
-    xmlRows+='<Row>'+cols.map(dCell).join('')+'</Row>\\n';
+    xmlRows+='<Row>'+cols.map(dCell).join('')+'</Row>\n';
   }
   var xml='<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1B3F8B" ss:Pattern="Solid"/></Style><Style ss:ID="d"/></Styles><Worksheet ss:Name="Crane Bookings"><Table>'+xmlRows+'</Table></Worksheet></Workbook>';
   var blob=new Blob([xml],{type:'application/vnd.ms-excel'});
@@ -728,10 +703,10 @@ function saveEdit(){
   var notes=document.getElementById('e-notes').value.trim();
   var errs=[];
   if(!site)errs.push('Site Name');if(!from)errs.push('From');if(!to)errs.push('To');if(!date)errs.push('Date');if(!time)errs.push('Start Time');if(!endtime)errs.push('End Time');
-  if(errs.length){alert('Please complete:\\n- '+errs.join('\\n- '));return;}
+  if(errs.length){alert('Please complete:\n- '+errs.join('\n- '));return;}
   if(endtime<=time){alert('End Time must be after Start Time.');return;}
   var clash=checkClash(date,time,endtime,editCurrentKey);
-  if(clash){alert('\u26a0\ufe0f Clash detected!\\n\\nApproved booking: '+clash.site+' '+fmtTime(clash.time)+' \u2013 '+fmtTime(clash.endtime||''));return;}
+  if(clash){alert('⚠️ Clash detected!\n\nApproved booking: '+clash.site+' '+fmtTime(clash.time)+' – '+fmtTime(clash.endtime||''));return;}
   var loadType=ltSel;
   if(ltSel==='Other'){var ot=document.getElementById('e-other-text').value.trim();loadType=ot?'Other: '+ot:'Other';}
   var updates={site:site,from:from,to:to,date:date,time:time,endtime:endtime,loadType:loadType,notes:notes};
@@ -763,9 +738,9 @@ function renderCalendar(){
     var bks=byDate[dateStr]||[];
     if(bks.length)cls+=' has-booking';
     var pills='';
-    for(var p=0;p<Math.min(bks.length,2);p++){var bk=bks[p];var short=bk.site.length>10?bk.site.substring(0,10)+'\u2026':bk.site;var dc=bk.status==='declined'?' pill-declined':'';pills+='<div class="day-pill '+pillCls(bk.loadType)+dc+'">'+esc(short)+'</div>';}
+    for(var p=0;p<Math.min(bks.length,2);p++){var bk=bks[p];var short=bk.site.length>10?bk.site.substring(0,10)+'…':bk.site;var dc=bk.status==='declined'?' pill-declined':'';pills+='<div class="day-pill '+pillCls(bk.loadType)+dc+'">'+esc(short)+'</div>';}
     if(bks.length>2)pills+='<div class="day-more">+'+(bks.length-2)+' more</div>';
-    var click=bks.length?'onclick="showDay(\''+dateStr+'\')"':'';
+    var click=bks.length?'onclick="showDay(''+dateStr+'')"':'';
     html+='<div class="'+cls+'" '+click+'><div class="day-num">'+label+'</div><div class="day-bookings">'+pills+'</div></div>';
   }
   document.getElementById('cal-days').innerHTML=html;
@@ -779,11 +754,11 @@ function showDay(dateStr){
   for(var i=0;i<bks.length;i++){
     var b=bks[i];
     html+='<div class="detail-item"><div style="font-weight:700">'+esc(b.site)+' '+badge(b.status)+'</div>';
-    html+='<div style="font-size:13px;color:var(--muted);margin-top:4px">\uD83D\uDD50 '+fmtTime(b.time)+' \u2013 '+fmtTime(b.endtime||'')+' \u00b7 \uD83D\uDCE6 '+esc(b.loadType)+'</div>';
-    if(b.from||b.to)html+='<div style="font-size:13px;color:var(--muted)">\uD83D\uDE9A '+esc(b.from||'\u2014')+' \u2192 '+esc(b.to||'\u2014')+'</div>';
+    html+='<div style="font-size:13px;color:var(--muted);margin-top:4px">🕐 '+fmtTime(b.time)+' – '+fmtTime(b.endtime||'')+' · 📦 '+esc(b.loadType)+'</div>';
+    if(b.from||b.to)html+='<div style="font-size:13px;color:var(--muted)">🚚 '+esc(b.from||'—')+' → '+esc(b.to||'—')+'</div>';
     if(b.notes)html+='<div style="font-size:12px;color:var(--muted);font-style:italic">'+esc(b.notes)+'</div>';
-    if(b.status==='declined'&&b.reason)html+='<div style="font-size:12px;color:#991B1B;font-style:italic">\u274c Reason: '+esc(b.reason)+'</div>';
-    if(b.completedAt)html+='<div style="margin-top:6px"><span class="completed-stamp">\uD83C\uDFC1 Completed \u00b7 '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
+    if(b.status==='declined'&&b.reason)html+='<div style="font-size:12px;color:#991B1B;font-style:italic">❌ Reason: '+esc(b.reason)+'</div>';
+    if(b.completedAt)html+='<div style="margin-top:6px"><span class="completed-stamp">🏁 Completed · '+new Date(b.completedAt).toLocaleString('en-ZA',{dateStyle:'short',timeStyle:'short'})+'</span></div>';
     html+='<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Submitted by '+esc(b.name)+'</div></div>';
   }
   document.getElementById('day-detail-list').innerHTML=html;
@@ -791,8 +766,6 @@ function showDay(dateStr){
 }
 
 document.getElementById('f-date').min=todayStr();
-<\/script>
-</body>
-</html>`;
-}
 </script>
+</body>
+</html>
