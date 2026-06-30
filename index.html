@@ -660,7 +660,7 @@ function saveOdoEdit(key) {
   var cs=document.getElementById('ecs-'+key).value.trim();
   var ce=document.getElementById('ece-'+key).value.trim();
   if(ts&&te&&parseFloat(te)<parseFloat(ts)){alert('Truck End cannot be less than Start.');return;}
-  if(cs&&ce&&parseFloat(ce)<parseFloat(cs)){alert('Crane End cannot be less than Start.');return;}
+  if(cs&&ce&&parseFloat(ce)>parseFloat(cs)){alert('Crane End cannot be more than Start (hours count down to service).');return;}
   updateBooking(key,{truckStart:ts,truckEnd:te,craneStart:cs,craneEnd:ce,odoSavedAt:new Date().toISOString()})
     .then(function(){showToast('Readings updated!','#0F766E');})
     .catch(function(e){alert('Error: '+e.message);});
@@ -672,7 +672,7 @@ function saveOdoEdit(key) {
   var ce=document.getElementById('ce-'+key)?document.getElementById('ce-'+key).value.trim():'';
   if(!ts&&!te&&!cs&&!ce){alert('Please enter at least one reading.');return;}
   if(ts&&te&&parseFloat(te)<parseFloat(ts)){alert('Truck End cannot be less than Start.');return;}
-  if(cs&&ce&&parseFloat(ce)<parseFloat(cs)){alert('Crane End cannot be less than Start.');return;}
+  if(cs&&ce&&parseFloat(ce)>parseFloat(cs)){alert('Crane End cannot be more than Start (hours count down to service).');return;}
   updateBooking(key,{truckStart:ts,truckEnd:te,craneStart:cs,craneEnd:ce,odoSavedAt:new Date().toISOString()}).then(function(){showToast('Readings saved!','#0F766E');}).catch(function(e){alert('Error: '+e.message);});
 }
 
